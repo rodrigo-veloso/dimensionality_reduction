@@ -7,3 +7,4 @@ openpyxl==3.0.6
 matplotlib
 scikit-learn==0.24
 mlxtend
+umap-learn
