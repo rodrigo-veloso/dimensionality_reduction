@@ -1,5 +1,6 @@
 
 import streamlit as st
+import time
 
 st.sidebar.write("""## Choose a Page""")
 page = st.sidebar.radio('Pages', ['Dimensionality Reduction Examples','Visual Comparison'])
@@ -394,13 +395,15 @@ if page == 'Visual Comparison':
 
     st.write("""### Choose Algorithm: """)
 
-    dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-distributed Stochastic Neighbor Embedding":{"reducer":"tsne"},"UMAP: Uniform Manifold Approximation and Projection":{"reducer":"umap"}}
+    dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-SNE":{"reducer":"tsne"},"UMAP":{"reducer":"umap"}}
 
-    algo_1 =st.selectbox("""""", ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"],key=1)
+    options = ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP"]
+
+    algo_1 =st.selectbox("""""", options, key=1)
 
     st.write("""### Compare with: """)
 
-    algo_2 = st.selectbox("""""", ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"],key=2)
+    algo_2 = st.selectbox("""""", options, key=2)
 
     #if st.button('Advanced Options'):
     #    input1 = st.text_input('Enter parameters for '+algo_1+':',key=1)
@@ -462,10 +465,12 @@ if page == 'Visual Comparison':
         ax = fig.add_subplot(1, num_plots, 1)
         ax.scatter(cls1['1'],cls1['2'])
         ax.scatter(cls2['1'],cls2['2'])
+        ax.set_title(algo_1)
         if isinstance(cls3, pd.DataFrame):
             ax = fig.add_subplot(1, num_plots, 2)
             ax.scatter(cls3['1'],cls3['2'])
             ax.scatter(cls4['1'],cls4['2'])
+            ax.set_title(algo_2)
         st.pyplot(plt)
 
     def plot3d(cls1,cls2,cls3=None,cls4=None):
@@ -475,10 +480,12 @@ if page == 'Visual Comparison':
         ax = fig.add_subplot(1, num_plots, 1,projection='3d')
         ax.scatter(cls1['1'],cls1['2'],cls1['3'])
         ax.scatter(cls2['1'],cls2['2'],cls2['3'])
+        ax.set_title(algo_1)
         if isinstance(cls3, pd.DataFrame):
             ax = fig.add_subplot(1, num_plots, 2,projection='3d')
             ax.scatter(cls3['1'],cls3['2'],cls3['3'])
             ax.scatter(cls4['1'],cls4['2'],cls4['3'])
+            ax.set_title(algo_2)
         st.pyplot(plt)
 
     p = Preprocessing()
@@ -491,8 +498,12 @@ if page == 'Visual Comparison':
     d1 = DimensionalityReducer(**dic[algo_1])
     d2 = DimensionalityReducer(**dic[algo_2])
     X = preprocess(df)
+    begin = time.time()
     X_t1 = d1.fit_transform(X)
+    time_1 = time.time() - begin
+    begin = time.time()
     X_t2 = d2.fit_transform(X)
+    time_2 = time.time() - begin
     class_1, class_2 = vis_support(df,X_t1)
     class_3, class_4 = vis_support(df,X_t2)
 
@@ -504,3 +515,6 @@ if page == 'Visual Comparison':
         class_1, class_2 = vis_support3d(df,X_t1)
         class_3, class_4 = vis_support3d(df,X_t2)
         plot3d(class_1,class_2,class_3,class_4)
+
+    st.write("""### Time for {}: {}""".format(algo_1,time_1))
+    st.write("""### Time for {}: {}""".format(algo_2,time_2))
