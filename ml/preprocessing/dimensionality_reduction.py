@@ -9,7 +9,7 @@ from sklearn.manifold import MDS
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import SpectralEmbedding
 from sklearn.manifold import TSNE
-from umap import UMAP
+#from umap import UMAP
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import keras
 import numpy as np
@@ -95,7 +95,7 @@ class DimensionalityReducer:
                          'spectral_embedding': SpectralEmbedding,
                          'tsne': TSNE,
                          'mds':MDS,
-                         'umap':UMAP,
+                         #'umap':UMAP,
                          'latent_dirichlet':LatentDirichletAllocation,
                          'truncated_svd':TruncatedSVD,
                          'nmf':NMF,
@@ -125,7 +125,7 @@ class DimensionalityReducer:
         self.reduction.fit(X,y)
         self.fitted = True
 
-    def transform(self, df: pd.DataFrame):
+    def transform(self, df: pd.DataFrame, y = None):
         """
         Select features based on fit
         
@@ -185,57 +185,3 @@ class DimensionalityReducer:
         
         #return self.selection.transform(df)
         return self.reduction.inverse_transform(df)
-
-    @staticmethod
-    def mean_abs_diff(X, y=None):
-        """
-        method to compute the mean absolute difference (MAD) of all atributes of X
-        
-    	Parameters
-    	----------            
-        X : pd.DataFrame
-             dataframe 
-        y: any type
-            not necessary, used only for compatibility issues
-                    
-    	Returns
-    	-------
-        pd.DataFrame
-        """
-        return np.sum(np.abs(X - np.mean(X, axis = 0)), axis = 0)/X.shape[0]
-
-    @staticmethod
-    def variance(X, y=None):
-        """
-        method to compute the mean variance of all atributes of X
-        
-    	Parameters
-    	----------            
-        X : pd.DataFrame
-             dataframe 
-        y: any type
-            not necessary, used only for compatibility issues
-                    
-    	Returns
-    	-------
-        pd.DataFrame
-        """
-        return np.sum((X - np.mean(X, axis = 0)**2), axis = 0)/X.shape[0]
-  
-    @staticmethod
-    def disp_ratio(X, y=None):
-        """
-        method to compute the dispersion ratio of all atributes od X
-        
-    	Parameters
-    	----------            
-        X : pd.DataFrame
-             dataframe
-        y: any type
-            not necessary, used only for compatibility issues
-                    
-    	Returns
-    	-------
-        pd.DataFrame
-        """
-        return np.mean(X, axis = 0)/np.power(np.prod(X, axis = 0),1/X.shape[0])

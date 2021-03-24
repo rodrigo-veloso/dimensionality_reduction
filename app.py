@@ -408,23 +408,23 @@ if page == 'Dimensionality Reduction Examples':
 
     #############################################################################################################
 
-    st.write("""## Uniform Manifold Approximation and Projection (UMAP)""")
+    #st.write("""## Uniform Manifold Approximation and Projection (UMAP)""")
 
-    st.write(""" The details for the underlying mathematics can be found in: https://arxiv.org/abs/1802.03426""")
-    st.write(""" To learn even more: https://umap-learn.readthedocs.io/en/latest/""")
+    #st.write(""" The details for the underlying mathematics can be found in: https://arxiv.org/abs/1802.03426""")
+    #st.write(""" To learn even more: https://umap-learn.readthedocs.io/en/latest/""")
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('umap', n_components=2, n_neighbors = 15, min_dist = 0.1)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+    #st.write("""### 2 dimensions example""")
+    #plt.clf()
+    #with st.echo():
+    #    d = DimensionalityReducer('umap', n_components=2, n_neighbors = 15, min_dist = 0.1)
+    #    X = preprocess(df,norm_cols = {'z-score':X.columns})
+    #    d.fit(X)
+    #    X_t = d.transform(X)
+    #class_list = vis_support(df,X_t)
+    #plot(class_list)
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "umap", n_components = 3, n_neighbors = 15, min_dist = 0.1)
+    #st.write("""### 3 dimensions example""")
+    #get_3d(X, df, reducer = "umap", n_components = 3, n_neighbors = 15, min_dist = 0.1)
 
     #############################################################################################################
 
