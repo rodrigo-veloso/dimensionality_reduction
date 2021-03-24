@@ -9,9 +9,42 @@ from sklearn.manifold import MDS
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import SpectralEmbedding
 from sklearn.manifold import TSNE
-from umap.umap_ import UMAP
+from umap import UMAP
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+import keras
 import numpy as np
 import pandas as pd
+
+#class AutoEncoder(self,X,):
+#    pass:
+
+class Autoencoder:
+    
+    def __init__(self, n_components, n_layers = 1, **kwargs):
+        self.n_components = n_components
+        self.n_layers = n_layers
+        self.kwargs = kwargs
+
+    def fit(self, X, y = None):
+        #if isinstance(X,pd.DataFrame):
+        #    X = X.values
+        #print(X)
+        input_ = keras.layers.Input(shape=(X.shape[1]))
+        encoded = keras.layers.Dense(self.n_components, activation='relu')(input_)
+        decoded = keras.layers.Dense(X.shape[1], activation='relu')(encoded)
+
+        self.autoencoder = keras.Model(input_,decoded)
+        self.encoder = keras.Model(input_, encoded)
+        self.autoencoder.compile(loss = keras.losses.MeanSquaredError())
+        print(X.shape[1])
+        self.autoencoder.fit(X, X, epochs = 100, batch_size = 64, shuffle=True)
+
+    def transform(self, X, y = None):
+        return self.encoder.predict(X)
+
+    def fit_transform(self, X, y = None):
+        self.fit(X)
+        return self.encoder.predict(X)
 
 class DimensionalityReducer:
     
@@ -63,9 +96,11 @@ class DimensionalityReducer:
                          'tsne': TSNE,
                          'mds':MDS,
                          'umap':UMAP,
-                         'lda':LatentDirichletAllocation,
+                         'latent_dirichlet':LatentDirichletAllocation,
                          'truncated_svd':TruncatedSVD,
-                         'nmf':NMF}
+                         'nmf':NMF,
+                         'linear_discriminant':LinearDiscriminantAnalysis,
+                         'autoencoder':Autoencoder}
         self.kwargs = kwargs 
         self.fitted = False
         self.reduction = self.reducers[self.reducer](**self.kwargs)
@@ -111,7 +146,7 @@ class DimensionalityReducer:
         #return self.selection.transform(df)
         return self.reduction.transform(df)
 
-    def fit_transform(self, df: pd.DataFrame):
+    def fit_transform(self, df: pd.DataFrame, y = None):
         """
         Select features based on fit
         
@@ -128,7 +163,7 @@ class DimensionalityReducer:
 
         
         #return self.selection.transform(df)
-        return self.reduction.fit_transform(df)
+        return self.reduction.fit_transform(df, y)
     
     def inverse_transform(self, df: pd.DataFrame):
         """

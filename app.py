@@ -24,9 +24,7 @@ if page == 'Dimensionality Reduction Examples':
 
         from ml.data_source.spreadsheet import Spreadsheet
         from ml.preprocessing.preprocessing import Preprocessing
-        from ml.preprocessing.feature_selection import FeatureSelector
         from ml.preprocessing.dimensionality_reduction import DimensionalityReducer
-        #from ml.model.trainer import TrainerSklearn
         from ml.preprocessing.normalization import Normalizer
 
         from sklearn.model_selection import train_test_split
@@ -39,25 +37,85 @@ if page == 'Dimensionality Reduction Examples':
 
     st.write("""### The data""")
     with st.echo():
-        df = Spreadsheet().get_data('train.csv',columns=['Survived','Pclass','Sex','Age'])
+        df = Spreadsheet().get_data('iris.csv')
 
     st.write(df.head(5))
 
+    def preprocess(df, norm_cols = {}):
+        p = Preprocessing()
+        n = Normalizer(norm_cols = norm_cols)
+        df = p.clean_data(df)
+        X = df.drop(columns=['class'])
+        y = df['class']
+        X = p.categ_encoding(X)
+        X = n.fit_transform(X)
+        return X
+
+    def vis_support(df,X_, target = 'class'):
+        df_ = df.copy()
+        for column in df_.columns:
+            if column != target:
+                df_ = df_.drop(columns=[column])
+        df_['1'] = X_[:,0]
+        df_['2'] = X_[:,1]
+        print(df_)
+        class_list = []
+        for label in df_[target].unique():
+            class_list.append(df_[df_[target]==label])
+        return class_list
+
+    def plot(class_list1, class_list2 = None):
+        plt.clf()
+        fig = plt.figure()
+        num_plots = 2 if isinstance(class_list2, list) else 1
+        ax = fig.add_subplot(1, num_plots, 1)
+        for cls in class_list1:
+            ax.scatter(cls['1'],cls['2'])
+        if isinstance(class_list2, list):
+            ax = fig.add_subplot(1, num_plots, 2)
+            for cls in class_list2:
+                ax.scatter(cls['1'],cls['2'])
+        st.pyplot(plt)
+
+    def plot3d(class_list1, class_list2 = None):
+        plt.clf()
+        fig = plt.figure()
+        num_plots = 2 if isinstance(class_list2, list) else 1
+        ax = fig.add_subplot(1, num_plots, 1,projection='3d')
+        for cls in class_list1:
+            ax.scatter(cls['1'],cls['2'],cls['3']) 
+        if isinstance(class_list2, list):
+            ax = fig.add_subplot(1, num_plots, 2,projection='3d')
+            for cls in class_list2:
+                ax.scatter(cls['1'],cls['2'],cls['3'])
+
+    def get_3d(X, df, y = None, target = 'class', **kwargs):
+        plt.clf()
+        X = preprocess(df)
+        reducer = kwargs.get('reducer')
+        if reducer:
+            d = DimensionalityReducer(**kwargs)
+        X_t = d.fit_transform(X,y) if reducer else X.values 
+        df_ = df.copy()
+        for column in df_.columns:
+            if column != target:
+                df_ = df_.drop(columns=[column])
+        df_['1'] = X_t[:,0]
+        df_['2'] = X_t[:,1]
+        df_['3'] = X_t[:,2]
+        class_list = []
+        for label in df_[target].unique():
+            class_list.append(df_[df_[target]==label])
+        plot3d(class_list)
+        st.pyplot(plt)
+
     p = Preprocessing()
     df = p.clean_data(df)
-    y = df['Survived']
-    X = df.drop(columns=['Survived'])
+    y = df['class']
+    X = df.drop(columns=['class'])
     X = p.categ_encoding(X)
-    df_ = df.copy()
-    df_['Sex'] = X['Sex_male']
-    class_0 = df_[df_['Survived']==0]
-    class_1 = df_[df_['Survived']==1]
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    ax.scatter(class_0['Pclass'],class_0['Sex'],class_0['Age'])
-    ax.scatter(class_1['Pclass'],class_1['Sex'],class_1['Age'])
-
-    st.pyplot(plt)
+    get_3d(X, df)
+    #st.write("""It removes all features which variance doesn’t meet the threshold. By default threshold = 0, features with zero variance are features that have the same value in all samples.""")
 
     st.write("""## Defining preprocess function:""")
     with st.echo():
@@ -65,58 +123,33 @@ if page == 'Dimensionality Reduction Examples':
             p = Preprocessing()
             n = Normalizer(norm_cols = norm_cols)
             df = p.clean_data(df)
-            X = df.drop(columns=['Survived'])
+            X = df.drop(columns=['class'])
+            y = df['class']
             X = p.categ_encoding(X)
             X = n.fit_transform(X)
             return X
 
-    def vis_support(df,X_):
-        df_ = df.copy()
-        df_ = df_.drop(columns=['Pclass','Age','Sex'])
-        df_['1'] = X_[:,0]
-        df_['2'] = X_[:,1]
-        class_0 = df_[df_['Survived']==0]
-        class_1 = df_[df_['Survived']==1]
-        return class_0,class_1
+    #############################################################################################################
 
-    def plot(cls1,cls2,cls3 = None, cls4 = None):
-        plt.clf()
-        fig = plt.figure()
-        num_plots = 2 if isinstance(cls3, pd.DataFrame) else 1
-        ax = fig.add_subplot(1, num_plots, 1)
-        ax.scatter(cls1['1'],cls1['2'])
-        ax.scatter(cls2['1'],cls2['2'])
-        if isinstance(cls3, pd.DataFrame):
-            ax = fig.add_subplot(1, num_plots, 2)
-            ax.scatter(cls3['1'],cls3['2'])
-            ax.scatter(cls4['1'],cls4['2'])
-        st.pyplot(plt)
+    st.write("""## Autoencoder""")
 
-    def plot3d(cls1,cls2,cls3=None,cls4=None):
-        plt.clf()
-        fig = plt.figure()
-        num_plots = 2 if isinstance(cls3, pd.DataFrame) else 1
-        ax = fig.add_subplot(1, num_plots, 1,projection='3d')
-        ax.scatter(cls1['1'],cls1['2'],cls1['3'])
-        ax.scatter(cls2['1'],cls2['2'],cls2['3'])
-        if isinstance(cls3, pd.DataFrame):
-            ax = fig.add_subplot(1, num_plots, 2,projection='3d')
-            ax.scatter(cls3['1'],cls3['2'],cls3['3'])
-            ax.scatter(cls4['1'],cls4['2'],cls4['3'])
+    st.write("""### 2 dimensions example""")
 
-    def get_3d(**kwargs):
-        plt.clf()
-        d = DimensionalityReducer(**kwargs)
+    #st.selectbox("""Compare with: """, ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"])
+
+    #dic = {"PCA":{""},"ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"}
+
+    plt.clf()
+    with st.echo():
+        d = DimensionalityReducer('autoencoder', n_components=2)
         X = preprocess(df)
-        X_t = d.fit_transform(X)
-        df_['1'] = X_t[:,0]
-        df_['2'] = X_t[:,1]
-        df_['3'] = X_t[:,2]
-        class_0 = df_[df_['Survived']==0]
-        class_1 = df_[df_['Survived']==1]
-        plot3d(class_0, class_1)
-        st.pyplot(plt)
-    #st.write("""It removes all features which variance doesn’t meet the threshold. By default threshold = 0, features with zero variance are features that have the same value in all samples.""")
+        d.fit(X)
+        X_t = d.transform(X)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
+
+    st.write("""### 3 dimensions example""")
+    get_3d(X, df, reducer = "autoencoder", n_components = 3)
 
     #############################################################################################################
 
@@ -134,11 +167,11 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "factor_analysis", n_components = 3)
+    get_3d(X, df, reducer = "factor_analysis", n_components = 3)
 
     #############################################################################################################
 
@@ -151,11 +184,11 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "pca", n_components = 3)
+    get_3d(X, df, reducer = "pca", n_components = 3)
 
     #############################################################################################################
 
@@ -168,11 +201,26 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "ica", n_components = 3)
+    get_3d(X, df, reducer = "ica", n_components = 3)
+
+    #############################################################################################################
+
+    st.write("""## Linear Discriminant Analysis""")
+
+    st.write("""### 2 dimensions example""")
+    plt.clf()
+    with st.echo():
+        d = DimensionalityReducer('linear_discriminant', n_components=2)
+        X = preprocess(df)
+        y = df['class']
+        d.fit(X,y)
+        X_t = d.transform(X)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     #############################################################################################################
 
@@ -204,11 +252,11 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "truncated_svd", n_components = 3)
+    get_3d(X, df, reducer = "truncated_svd", n_components = 3)
 
     #############################################################################################################
 
@@ -221,11 +269,11 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "nmf", n_components = 3)
+    get_3d(X, df, reducer = "nmf", n_components = 3)
 
     #############################################################################################################
 
@@ -235,14 +283,14 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 5, n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "locally_linear_embedding", n_components = 3)
+    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3)
 
     #############################################################################################################
 
@@ -252,14 +300,14 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 15, n_components=2, method = 'modified')
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 15, method = 'modified')
+    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 15, method = 'modified')
 
     #############################################################################################################
 
@@ -269,14 +317,14 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 20, n_components=2, method = 'hessian')
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 20, method = 'hessian')
+    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 20, method = 'hessian')
 
     #############################################################################################################
 
@@ -286,13 +334,13 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('spectral_embedding', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         X_t = d.fit_transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = 'spectral_embedding', n_components = 3)
+    get_3d(X, df, reducer = 'spectral_embedding', n_components = 3)
 
     #############################################################################################################
 
@@ -302,13 +350,13 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 18, n_components=2, method = 'ltsa')
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         X_t = d.fit_transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 18, method = 'ltsa')
+    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 18, method = 'ltsa')
 
     #############################################################################################################
 
@@ -318,13 +366,13 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('mds', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         X_t = d.fit_transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "mds", n_components = 3)
+    get_3d(X, df, reducer = "mds", n_components = 3)
 
     #############################################################################################################
 
@@ -334,13 +382,13 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('isomap', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         X_t = d.fit_transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "isomap", n_components = 3)
+    get_3d(X, df, reducer = "isomap", n_components = 3)
 
     #############################################################################################################
 
@@ -350,13 +398,13 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('tsne', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         X_t = d.fit_transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "tsne", n_components = 3)
+    get_3d(X, df, reducer = "tsne", n_components = 3)
 
     #############################################################################################################
 
@@ -369,14 +417,14 @@ if page == 'Dimensionality Reduction Examples':
     plt.clf()
     with st.echo():
         d = DimensionalityReducer('umap', n_components=2, n_neighbors = 15, min_dist = 0.1)
-        X = preprocess(df,norm_cols = {'z-score':['Pclass','Age','Sex_male','Sex_female']})
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
         d.fit(X)
         X_t = d.transform(X)
-    class_0, class_1 = vis_support(df,X_t)
-    plot(class_0,class_1)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(reducer = "umap", n_components = 3, n_neighbors = 15, min_dist = 0.1)
+    get_3d(X, df, reducer = "umap", n_components = 3, n_neighbors = 15, min_dist = 0.1)
 
     #############################################################################################################
 
@@ -395,9 +443,9 @@ if page == 'Visual Comparison':
 
     st.write("""### Choose Algorithm: """)
 
-    dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-SNE":{"reducer":"tsne"},"UMAP":{"reducer":"umap"}}
+    dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-SNE":{"reducer":"tsne"},"UMAP":{"reducer":"umap"},"Autoencoder":{"reducer":"autoencoder"}}
 
-    options = ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP"]
+    options = ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP","Autoencoder"]
 
     algo_1 =st.selectbox("""""", options, key=1)
 
@@ -418,7 +466,6 @@ if page == 'Visual Comparison':
     from ml.preprocessing.preprocessing import Preprocessing
     from ml.preprocessing.feature_selection import FeatureSelector
     from ml.preprocessing.dimensionality_reduction import DimensionalityReducer
-    #from ml.model.trainer import TrainerSklearn
     from ml.preprocessing.normalization import Normalizer
 
     from sklearn.model_selection import train_test_split
@@ -428,65 +475,69 @@ if page == 'Visual Comparison':
     from sklearn.svm import SVR
     from sklearn.svm import LinearSVC
     from mpl_toolkits.mplot3d import Axes3D
-    df = Spreadsheet().get_data('train.csv',columns=['Survived','Pclass','Sex','Age'])
+    df = Spreadsheet().get_data('iris.csv')
+
+    def vis_support(df,X_, target = 'class'):
+        df_ = df.copy()
+        for column in df_.columns:
+            if column != target:
+                df_ = df_.drop(columns=[column])
+        df_['1'] = X_[:,0]
+        df_['2'] = X_[:,1]
+        print(df_)
+        class_list = []
+        for label in df_[target].unique():
+            class_list.append(df_[df_[target]==label])
+        return class_list
 
     def preprocess(df, norm_cols = {}):
         p = Preprocessing()
         n = Normalizer(norm_cols = norm_cols)
         df = p.clean_data(df)
-        X = df.drop(columns=['Survived'])
+        X = df.drop(columns=['class'])
         X = p.categ_encoding(X)
         X = n.fit_transform(X)
         return X
 
-    def vis_support(df,X_):
+    def plot(class_list1, class_list2 = None):
+        plt.clf()
+        fig = plt.figure()
+        num_plots = 2 if isinstance(class_list2, list) else 1
+        ax = fig.add_subplot(1, num_plots, 1)
+        for cls in class_list1:
+            ax.scatter(cls['1'],cls['2'])
+        if isinstance(class_list2, list):
+            ax = fig.add_subplot(1, num_plots, 2)
+            for cls in class_list2:
+                ax.scatter(cls['1'],cls['2'])
+        st.pyplot(plt)
+
+    def plot3d(class_list1, class_list2 = None):
+        plt.clf()
+        fig = plt.figure()
+        num_plots = 2 if isinstance(class_list2, list) else 1
+        ax = fig.add_subplot(1, num_plots, 1,projection='3d')
+        for cls in class_list1:
+            ax.scatter(cls['1'],cls['2'],cls['3']) 
+        if isinstance(class_list2, list):
+            ax = fig.add_subplot(1, num_plots, 2,projection='3d')
+            for cls in class_list2:
+                ax.scatter(cls['1'],cls['2'],cls['3'])
+        st.pyplot(plt)
+
+    def vis_support3d(df,X_, target = 'class'):
         df_ = df.copy()
-        df_ = df_.drop(columns=['Pclass','Age','Sex'])
-        df_['1'] = X_[:,0]
-        df_['2'] = X_[:,1]
-        class_0 = df_[df_['Survived']==0]
-        class_1 = df_[df_['Survived']==1]
-        return class_0,class_1
-    
-    def vis_support3d(df,X_):
-        df_ = df.copy()
-        df_ = df_.drop(columns=['Pclass','Age','Sex'])
+        for column in df_.columns:
+            if column != target:
+                df_ = df_.drop(columns=[column])
         df_['1'] = X_[:,0]
         df_['2'] = X_[:,1]
         df_['3'] = X_[:,2]
-        class_0 = df_[df_['Survived']==0]
-        class_1 = df_[df_['Survived']==1]
-        return class_0,class_1
-
-    def plot(cls1,cls2,cls3 = None, cls4 = None):
-        plt.clf()
-        fig = plt.figure()
-        num_plots = 2 if isinstance(cls3, pd.DataFrame) else 1
-        ax = fig.add_subplot(1, num_plots, 1)
-        ax.scatter(cls1['1'],cls1['2'])
-        ax.scatter(cls2['1'],cls2['2'])
-        ax.set_title(algo_1)
-        if isinstance(cls3, pd.DataFrame):
-            ax = fig.add_subplot(1, num_plots, 2)
-            ax.scatter(cls3['1'],cls3['2'])
-            ax.scatter(cls4['1'],cls4['2'])
-            ax.set_title(algo_2)
-        st.pyplot(plt)
-
-    def plot3d(cls1,cls2,cls3=None,cls4=None):
-        plt.clf()
-        fig = plt.figure()
-        num_plots = 2 if isinstance(cls3, pd.DataFrame) else 1
-        ax = fig.add_subplot(1, num_plots, 1,projection='3d')
-        ax.scatter(cls1['1'],cls1['2'],cls1['3'])
-        ax.scatter(cls2['1'],cls2['2'],cls2['3'])
-        ax.set_title(algo_1)
-        if isinstance(cls3, pd.DataFrame):
-            ax = fig.add_subplot(1, num_plots, 2,projection='3d')
-            ax.scatter(cls3['1'],cls3['2'],cls3['3'])
-            ax.scatter(cls4['1'],cls4['2'],cls4['3'])
-            ax.set_title(algo_2)
-        st.pyplot(plt)
+        print(df_)
+        class_list = []
+        for label in df_[target].unique():
+            class_list.append(df_[df_[target]==label])
+        return class_list
 
     p = Preprocessing()
     df = p.clean_data(df)
@@ -504,17 +555,17 @@ if page == 'Visual Comparison':
     begin = time.time()
     X_t2 = d2.fit_transform(X)
     time_2 = time.time() - begin
-    class_1, class_2 = vis_support(df,X_t1)
-    class_3, class_4 = vis_support(df,X_t2)
+    class_list1 = vis_support(df,X_t1)
+    class_list2 = vis_support(df,X_t2)
 
     if n_components == '2':
-        class_1, class_2 = vis_support(df,X_t1)
-        class_3, class_4 = vis_support(df,X_t2)
-        plot(class_1,class_2,class_3,class_4)
+        class_list1 = vis_support(df,X_t1)
+        class_list2 = vis_support(df,X_t2)
+        plot(class_list1,class_list2)
     else:
-        class_1, class_2 = vis_support3d(df,X_t1)
-        class_3, class_4 = vis_support3d(df,X_t2)
-        plot3d(class_1,class_2,class_3,class_4)
+        class_list1 = vis_support3d(df,X_t1)
+        class_list2  = vis_support3d(df,X_t2)
+        plot3d(class_list1,class_list2)
 
     st.write("""### Time for {}: {}""".format(algo_1,time_1))
     st.write("""### Time for {}: {}""".format(algo_2,time_2))
