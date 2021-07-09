@@ -95,7 +95,10 @@ if page == 'Dimensionality Reduction Examples':
         reducer = kwargs.get('reducer')
         if reducer:
             d = DimensionalityReducer(**kwargs)
-        X_t = d.fit_transform(X,y) if reducer else X.values 
+        X_t = d.fit_transform(X,y) if reducer else X.values
+        if 'reducer' in kwargs:
+            if  kwargs['reducer'] == 'pca':
+                X_t = X_t.values
         df_ = df.copy()
         for column in df_.columns:
             if column != target:
@@ -167,6 +170,7 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
+    st.write(X_t)
     class_list = vis_support(df,X_t)
     plot(class_list)
 
@@ -180,15 +184,16 @@ if page == 'Dimensionality Reduction Examples':
     st.write("""### 2 dimensions example""")
     plt.clf()
     with st.echo():
-        d = DimensionalityReducer('pca', n_components=2)
         X = preprocess(df)
+        columns = X.columns
+        d = DimensionalityReducer('pca', columns = columns)
         d.fit(X)
         X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
+    class_list = vis_support(df,X_t.values)
     plot(class_list)
 
     st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "pca", n_components = 3)
+    get_3d(X, df, reducer = "pca", columns = columns, k = 3)
 
     #############################################################################################################
 
@@ -406,6 +411,22 @@ if page == 'Dimensionality Reduction Examples':
     st.write("""### 3 dimensions example""")
     get_3d(X, df, reducer = "tsne", n_components = 3)
 
+#############################################################################################################
+
+    st.write("""## UMAP: Uniform Manifold Approximation and Projection""")
+
+    st.write("""### 2 dimensions example""")
+    plt.clf()
+    with st.echo():
+        d = DimensionalityReducer('umap', n_components=2)
+        X = preprocess(df,norm_cols = {'z-score':X.columns})
+        X_t = d.fit_transform(X)
+    class_list = vis_support(df,X_t)
+    plot(class_list)
+
+    st.write("""### 3 dimensions example""")
+    get_3d(X, df, reducer = "umap", n_components = 3)
+
     #############################################################################################################
 
     #st.write("""## Uniform Manifold Approximation and Projection (UMAP)""")
@@ -437,21 +458,23 @@ if page == 'Visual Comparison':
 
     st.image('vertical_logo.png', width = 600)
 
-    st.write("""### Choose dimensions: """)
-  
-    n_components = st.radio('', ['2','3'])
+    col1, col2, col3 = st.beta_columns((3,6,6))
 
-    st.write("""### Choose Algorithm: """)
+    col1.write("""### Choose dimensions: """)
+  
+    n_components = col1.radio('', ['2','3'])
+
+    col2.write("""### Choose Algorithm: """)
 
     dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-SNE":{"reducer":"tsne"},"UMAP":{"reducer":"umap"},"Autoencoder":{"reducer":"autoencoder"}}
 
     options = ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP","Autoencoder"]
 
-    algo_1 =st.selectbox("""""", options, key=1)
+    algo_1 =col2.selectbox("""""", options, key='1')
 
-    st.write("""### Compare with: """)
+    col3.write("""### Compare with: """)
 
-    algo_2 = st.selectbox("""""", options, key=2)
+    algo_2 = col3.selectbox("""""", options, key='2')
 
     #if st.button('Advanced Options'):
     #    input1 = st.text_input('Enter parameters for '+algo_1+':',key=1)
@@ -542,19 +565,28 @@ if page == 'Visual Comparison':
     p = Preprocessing()
     df = p.clean_data(df)
 
-    dic[algo_1]["n_components"] = int(n_components)
-    dic[algo_2]["n_components"] = int(n_components)
+    X = preprocess(df)
+
+    if algo_1 == 'PCA':
+        dic[algo_1]["k"] = int(n_components)
+        dic[algo_1]["columns"] = X.columns
+    else:
+        dic[algo_1]["n_components"] = int(n_components)
+    if algo_2 == 'PCA':
+        dic[algo_2]["k"] = int(n_components)
+        dic[algo_2]["columns"] = X.columns
+    else:
+        dic[algo_2]["n_components"] = int(n_components)
 
     plt.clf()
     d1 = DimensionalityReducer(**dic[algo_1])
     d2 = DimensionalityReducer(**dic[algo_2])
-    X = preprocess(df)
-    begin = time.time()
-    X_t1 = d1.fit_transform(X)
-    time_1 = time.time() - begin
-    begin = time.time()
-    X_t2 = d2.fit_transform(X)
-    time_2 = time.time() - begin
+    begin1 = time.process_time()
+    X_t1 = d1.fit_transform(X).values if algo_1 == 'PCA' else d1.fit_transform(X)
+    time_1 = time.process_time() - begin1
+    begin2 = time.process_time()
+    X_t2 = d2.fit_transform(X).values if algo_1 == 'PCA' else d1.fit_transform(X)
+    time_2 = time.process_time() - begin2
     class_list1 = vis_support(df,X_t1)
     class_list2 = vis_support(df,X_t2)
 
@@ -567,5 +599,7 @@ if page == 'Visual Comparison':
         class_list2  = vis_support3d(df,X_t2)
         plot3d(class_list1,class_list2)
 
-    st.write("""### Time for {}: {}""".format(algo_1,time_1))
-    st.write("""### Time for {}: {}""".format(algo_2,time_2))
+    #col1, col2 = st.beta_columns((1,1))
+
+    #col1.write("""### Time for {}: {}""".format(algo_1,time_1))
+    #col2.write("""### Time for {}: {}""".format(algo_2,time_2))

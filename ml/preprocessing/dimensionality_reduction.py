@@ -1,5 +1,5 @@
 from sklearn.decomposition import FactorAnalysis
-from sklearn.decomposition import PCA
+#from sklearn.decomposition import PCA
 from sklearn.decomposition import FastICA
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.decomposition import TruncatedSVD
@@ -9,14 +9,12 @@ from sklearn.manifold import MDS
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import SpectralEmbedding
 from sklearn.manifold import TSNE
-#from umap import UMAP
+from umap import UMAP
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from ml.preprocessing.pca import PCA
 import keras
 import numpy as np
 import pandas as pd
-
-#class AutoEncoder(self,X,):
-#    pass:
 
 class Autoencoder:
     
@@ -26,9 +24,6 @@ class Autoencoder:
         self.kwargs = kwargs
 
     def fit(self, X, y = None):
-        #if isinstance(X,pd.DataFrame):
-        #    X = X.values
-        #print(X)
         input_ = keras.layers.Input(shape=(X.shape[1]))
         encoded = keras.layers.Dense(self.n_components, activation='relu')(input_)
         decoded = keras.layers.Dense(X.shape[1], activation='relu')(encoded)
@@ -95,7 +90,7 @@ class DimensionalityReducer:
                          'spectral_embedding': SpectralEmbedding,
                          'tsne': TSNE,
                          'mds':MDS,
-                         #'umap':UMAP,
+                         'umap':UMAP,
                          'latent_dirichlet':LatentDirichletAllocation,
                          'truncated_svd':TruncatedSVD,
                          'nmf':NMF,
