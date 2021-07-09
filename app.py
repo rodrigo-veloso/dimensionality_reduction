@@ -134,28 +134,6 @@ if page == 'Dimensionality Reduction Examples':
 
     #############################################################################################################
 
-    st.write("""## Autoencoder""")
-
-    st.write("""### 2 dimensions example""")
-
-    #st.selectbox("""Compare with: """, ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"])
-
-    #dic = {"PCA":{""},"ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"}
-
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('autoencoder', n_components=2)
-        X = preprocess(df)
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
-
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "autoencoder", n_components = 3)
-
-    #############################################################################################################
-
     st.write("""## Factor Analysis""")
 
     st.write("""### 2 dimensions example""")
@@ -466,9 +444,9 @@ if page == 'Visual Comparison':
 
     col2.write("""### Choose Algorithm: """)
 
-    dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-SNE":{"reducer":"tsne"},"UMAP":{"reducer":"umap"},"Autoencoder":{"reducer":"autoencoder"}}
+    dic = {"PCA":{"reducer":"pca"},"ICA":{"reducer":"ica"},"Factor Analysis":{"reducer":"factor_analysis"},"Locally Linear Embedding":{"reducer":"locally_linear_embedding"},"Modified Locally Linear Embedding":{"reducer":"locally_linear_embedding","method":"modified","n_neighbors":18},"Hessian Eigenmapping":{"reducer":"locally_linear_embedding","method":"hessian","n_neighbors":18},"Spectral Embedding":{"reducer":"spectral_embedding"},"Local Tangent Space Alignment":{"reducer":"locally_linear_embedding","method":"ltsa","n_neighbors":18},"Multi-dimensional Scaling":{"reducer":"mds"},"Isomap":{"reducer":"isomap"},"t-SNE":{"reducer":"tsne"},"UMAP":{"reducer":"umap"}}
 
-    options = ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP","Autoencoder"]
+    options = ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP"]
 
     algo_1 =col2.selectbox("""""", options, key='1')
 
