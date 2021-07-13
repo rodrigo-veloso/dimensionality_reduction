@@ -2,6 +2,7 @@
 import streamlit as st
 import time
 
+st.set_page_config(page_title='Dimensionality Reduction', page_icon = 'logo_hermione.png')
 st.sidebar.write("""## Choose a Page""")
 page = st.sidebar.radio('Pages', ['Dimensionality Reduction Examples','Visual Comparison'])
 
