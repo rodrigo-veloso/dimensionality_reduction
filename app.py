@@ -132,77 +132,90 @@ if page == 'Dimensionality Reduction Examples':
             X = n.fit_transform(X)
             return X
 
+    options = ["PCA","ICA","Factor Analysis",'Linear Discriminant Analysis','Truncated SVD','Non-Negative Matrix Factorization (NMF)',"Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-SNE","UMAP"]
+
+    st.write("""### Choose Algorithm: """)
+
+    algo_1 =st.selectbox("""""", options, key='1')
     #############################################################################################################
 
-    st.write("""## Factor Analysis""")
+    if algo_1 == "Factor Analysis":
 
-    st.write("""### 2 dimensions example""")
+        st.write("""## Factor Analysis""")
 
-    #st.selectbox("""Compare with: """, ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"])
+        st.write("""### 2 dimensions example""")
 
-    #dic = {"PCA":{""},"ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"}
+        #st.selectbox("""Compare with: """, ["PCA","ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"])
 
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('factor_analysis', n_components=2)
-        X = preprocess(df)
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        #dic = {"PCA":{""},"ICA","Factor Analysis","Locally Linear Embedding","Modified Locally Linear Embedding","Hessian Eigenmapping","Spectral Embedding","Local Tangent Space Alignment","Multi-dimensional Scaling","Isomap","t-distributed Stochastic Neighbor Embedding","UMAP: Uniform Manifold Approximation and Projection"}
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "factor_analysis", n_components = 3)
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('factor_analysis', n_components=2)
+            X = preprocess(df)
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
 
-    #############################################################################################################
-
-    st.write("""## Principal Comonent Analysis""")
-
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        X = preprocess(df)
-        columns = X.columns
-        d = DimensionalityReducer('pca', columns = columns)
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t.values)
-    plot(class_list)
-
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "pca", columns = columns, k = 3)
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "factor_analysis", n_components = 3)
 
     #############################################################################################################
 
-    st.write("""## Independent Component Analysis""")
+    if algo_1 == "PCA":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('ica', n_components=2)
-        X = preprocess(df)
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Principal Comonent Analysis""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "ica", n_components = 3)
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            X = preprocess(df)
+            columns = X.columns
+            d = DimensionalityReducer('pca', columns = columns)
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t.values)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "pca", columns = columns, k = 3)
 
     #############################################################################################################
 
-    st.write("""## Linear Discriminant Analysis""")
+    if algo_1 == "ICA":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('linear_discriminant', n_components=2)
-        X = preprocess(df)
-        y = df['class']
-        d.fit(X,y)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Independent Component Analysis""")
+
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('ica', n_components=2)
+            X = preprocess(df)
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "ica", n_components = 3)
+
+    #############################################################################################################
+
+    if algo_1 == "Linear Discriminant Analysis":
+
+        st.write("""## Linear Discriminant Analysis""")
+
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('linear_discriminant', n_components=2)
+            X = preprocess(df)
+            y = df['class']
+            d.fit(X,y)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
 
     #############################################################################################################
 
@@ -225,184 +238,206 @@ if page == 'Dimensionality Reduction Examples':
 
     #############################################################################################################
 
-    st.write("""## Truncated SVD""")
+    if algo_1 == "Truncated SVD":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('truncated_svd', n_components=2)
-        X = preprocess(df)
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Truncated SVD""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "truncated_svd", n_components = 3)
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('truncated_svd', n_components=2)
+            X = preprocess(df)
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
 
-    #############################################################################################################
-
-    st.write("""## Non-Negative Matrix Factorization (NMF)""")
-
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('nmf', n_components=2)
-        X = preprocess(df)
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
-
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "nmf", n_components = 3)
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "truncated_svd", n_components = 3)
 
     #############################################################################################################
 
-    st.write("""## Locally Linear Embedding""")
+    if algo_1 == "Non-Negative Matrix Factorization (NMF)":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 5, n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Non-Negative Matrix Factorization (NMF)""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3)
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('nmf', n_components=2)
+            X = preprocess(df)
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
 
-    #############################################################################################################
-
-    st.write("""## Modified Locally Linear Embedding""")
-
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 15, n_components=2, method = 'modified')
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
-
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 15, method = 'modified')
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "nmf", n_components = 3)
 
     #############################################################################################################
 
-    st.write("""## Hessian Eigenmapping""")
+    if algo_1 == "Locally Linear Embedding":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 20, n_components=2, method = 'hessian')
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        d.fit(X)
-        X_t = d.transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Locally Linear Embedding""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 20, method = 'hessian')
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 5, n_components=2)
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
 
-    #############################################################################################################
-
-    st.write("""## Spectral Embedding""")
-
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('spectral_embedding', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        X_t = d.fit_transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
-
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = 'spectral_embedding', n_components = 3)
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3)
 
     #############################################################################################################
 
-    st.write("""## Local Tangent Space Alignment""")
+    if algo_1 == "Modified Locally Linear Embedding":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 18, n_components=2, method = 'ltsa')
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        X_t = d.fit_transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Modified Locally Linear Embedding""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 18, method = 'ltsa')
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 15, n_components=2, method = 'modified')
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
 
-    #############################################################################################################
-
-    st.write("""## Multi-dimensional Scaling""")
-
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('mds', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        X_t = d.fit_transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
-
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "mds", n_components = 3)
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 15, method = 'modified')
 
     #############################################################################################################
 
-    st.write("""## Isomap""")
+    if algo_1 == "Hessian Eigenmapping":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('isomap', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        X_t = d.fit_transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Hessian Eigenmapping""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "isomap", n_components = 3)
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 20, n_components=2, method = 'hessian')
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            d.fit(X)
+            X_t = d.transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 20, method = 'hessian')
 
     #############################################################################################################
 
-    st.write("""## t-distributed Stochastic Neighbor Embedding (t-SNE)""")
+    if algo_1 == "Spectral Embedding":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('tsne', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        X_t = d.fit_transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## Spectral Embedding""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "tsne", n_components = 3)
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('spectral_embedding', n_components=2)
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            X_t = d.fit_transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = 'spectral_embedding', n_components = 3)
+
+    #############################################################################################################
+
+    if algo_1 == "Local Tangent Space Alignment":
+
+        st.write("""## Local Tangent Space Alignment""")
+
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('locally_linear_embedding', n_neighbors = 18, n_components=2, method = 'ltsa')
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            X_t = d.fit_transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "locally_linear_embedding", n_components = 3, n_neighbors = 18, method = 'ltsa')
+
+    #############################################################################################################
+
+    if algo_1 == "Multi-dimensional Scaling":
+
+        st.write("""## Multi-dimensional Scaling""")
+
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('mds', n_components=2)
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            X_t = d.fit_transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "mds", n_components = 3)
+
+    #############################################################################################################
+
+    if algo_1 == "Isomap":
+
+        st.write("""## Isomap""")
+
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('isomap', n_components=2)
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            X_t = d.fit_transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "isomap", n_components = 3)
+
+    #############################################################################################################
+
+    if algo_1 == "t-SNE":
+
+        st.write("""## t-distributed Stochastic Neighbor Embedding (t-SNE)""")
+
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('tsne', n_components=2)
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            X_t = d.fit_transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "tsne", n_components = 3)
 
 #############################################################################################################
 
-    st.write("""## UMAP: Uniform Manifold Approximation and Projection""")
+    if algo_1 == "UMAP":
 
-    st.write("""### 2 dimensions example""")
-    plt.clf()
-    with st.echo():
-        d = DimensionalityReducer('umap', n_components=2)
-        X = preprocess(df,norm_cols = {'z-score':X.columns})
-        X_t = d.fit_transform(X)
-    class_list = vis_support(df,X_t)
-    plot(class_list)
+        st.write("""## UMAP: Uniform Manifold Approximation and Projection""")
 
-    st.write("""### 3 dimensions example""")
-    get_3d(X, df, reducer = "umap", n_components = 3)
+        st.write("""### 2 dimensions example""")
+        plt.clf()
+        with st.echo():
+            d = DimensionalityReducer('umap', n_components=2)
+            X = preprocess(df,norm_cols = {'z-score':X.columns})
+            X_t = d.fit_transform(X)
+        class_list = vis_support(df,X_t)
+        plot(class_list)
+
+        st.write("""### 3 dimensions example""")
+        get_3d(X, df, reducer = "umap", n_components = 3)
 
     #############################################################################################################
 
