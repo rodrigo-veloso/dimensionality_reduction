@@ -137,7 +137,7 @@ if page == 'Dimensionality Reduction Examples':
 
     st.write("""### Choose Algorithm: """)
 
-    algo_1 =st.selectbox("""""", options, key='1')
+    algo_1 =st.selectbox("""""", options, key='4')
     #############################################################################################################
 
     if algo_1 == "Factor Analysis":
@@ -594,12 +594,10 @@ if page == 'Visual Comparison':
     plt.clf()
     d1 = DimensionalityReducer(**dic[algo_1])
     d2 = DimensionalityReducer(**dic[algo_2])
-    begin1 = time.process_time()
+
     X_t1 = d1.fit_transform(X).values if algo_1 == 'PCA' else d1.fit_transform(X)
-    time_1 = time.process_time() - begin1
-    begin2 = time.process_time()
-    X_t2 = d2.fit_transform(X).values if algo_1 == 'PCA' else d1.fit_transform(X)
-    time_2 = time.process_time() - begin2
+    X_t2 = d2.fit_transform(X).values if algo_2 == 'PCA' else d2.fit_transform(X)
+
     class_list1 = vis_support(df,X_t1)
     class_list2 = vis_support(df,X_t2)
 
