@@ -6,5 +6,4 @@ numpy
 openpyxl==3.0.6
 matplotlib
 scikit-learn==0.24
-keras
-tensorflow
+umap-learn
