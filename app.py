@@ -148,7 +148,6 @@ if page == 'Dimensionality Reduction Examples':
         X = preprocess(df)
         d.fit(X)
         X_t = d.transform(X)
-    st.write(X_t)
     class_list = vis_support(df,X_t)
     plot(class_list)
 
