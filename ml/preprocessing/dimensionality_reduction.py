@@ -12,7 +12,6 @@ from sklearn.manifold import TSNE
 from umap import UMAP
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from ml.preprocessing.pca import PCA
-import keras
 import numpy as np
 import pandas as pd
 
